@@ -13,6 +13,188 @@ datasource db {
 model User {
   id String @id @default(uuid())
   email String  @unique
-  name  String?
-  password String
+  name  String
+  hashedPassword String
+  birth DateTime?
+  address String
+  phoneNumber String
+  gradeId String
+  grade Grade @relation(fields: [gradeId], references: [id])
+  orderHistory Order[]
+  cart Cart?
+  wishList WishList?
+  comments Comment[]
+  accessToken String?
+  refreshToken String?
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Grade {
+  id String @id @default(uuid())
+  name String
+  threshold Int
+  benefit Int
+  users User[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Product {
+  id String @id @default(uuid())
+  images ProductImage[]
+  name String
+  categories Category[]
+  stock Int
+  size Size[]
+  price Int
+  isDiscount Boolean @default(false)
+  discountRate Int?
+  starRate Int @default(0)
+  additionalInfos AdditionalInfo[]
+  orderProduct OrderProduct[]
+  wishList WishList[]
+  comments Comment[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Cart {
+  id String @id @default(uuid())
+  userId String @unique @default(uuid())
+  user User? @relation(fields: [userId], references: [id])
+  products OrderProduct[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model WishList {
+  id String @id @default(uuid())
+  userId String @unique
+  user User @relation(fields: [userId], references: [id])
+  products Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Order {
+  id String @id @default(uuid())
+  status OrderStatus @default(PROCESSING)
+  userId String
+  user User @relation(fields: [userId], references: [id])
+  products OrderProduct[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Notice {
+  id String @id @default(uuid())
+  thumbnail String?
+  title String
+  Content String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model OrderProduct {
+  id String @id @default(uuid())
+  productId String
+  orderId String?
+  cartId String?
+  product Product @relation(fields: [productId], references: [id])
+  order Order? @relation(fields: [orderId], references: [id])
+  cart Cart? @relation(fields: [cartId], references: [id])
+  quantity Int
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model ProductImage {
+  id String @id @default(uuid())
+  uri String
+  isThumbnail Boolean @default(false)
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Category {
+  id String @id @default(uuid())
+  name String
+  comment String?
+  parentId String?
+  isPromotion Boolean @default(false)
+  parent Category? @relation("CategorySelf", fields: [parentId], references: [id])
+  child Category[] @relation("CategorySelf")
+  product Product[]
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Banner {
+  id String @id @default(uuid())
+  thumbnail String
+  link String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Size {
+  id String @id @default(uuid())
+  name String
+  stock Int
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model AdditionalInfo {
+  id String @id @default(uuid())
+  name String
+  content String
+  productId String
+  product Product @relation(fields: [productId], references: [id])
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model MailTemplate {
+  id String @id @default(uuid())
+  mailType MailTemplateType
+  comment String
+  template String
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+model Comment {
+  id String @id @default(uuid())
+  userId String
+  productId String
+  parentId String?
+  starRate Int @default(0)
+  user User @relation(fields: [userId], references: [id])
+  product Product @relation(fields: [productId], references: [id])
+  parent Comment? @relation("CommentSelf", fields: [parentId], references: [id])
+  child Comment[] @relation("CommentSelf")
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+}
+
+enum OrderStatus {
+  PROCESSING
+  SHIPPED
+  IN_DELIVERY
+  DELIVERED
+  CANCELLED
+}
+
+enum MailTemplateType {
+  ORDER_SUCCESS
+  ORDER_CANCELLED
+  MAIL_VERIFICATION
+  SIGNUP_SUCCESS
+  CUSTOM
 }
