@@ -24,6 +24,7 @@ model User {
   cart Cart?
   wishList WishList?
   comments Comment[]
+  isAdmin Boolean @default(false)
   accessToken String?
   refreshToken String?
   createdAt DateTime @default(now())
