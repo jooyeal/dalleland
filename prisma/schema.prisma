@@ -18,8 +18,8 @@ model User {
   birth DateTime?
   address String
   phoneNumber String
-  gradeId String
-  grade Grade @relation(fields: [gradeId], references: [id])
+  gradeId String?
+  grade Grade? @relation(fields: [gradeId], references: [id])
   orderHistory Order[]
   cart Cart?
   wishList WishList?
@@ -51,7 +51,7 @@ model Product {
   price Int
   isDiscount Boolean @default(false)
   discountRate Int?
-  starRate Int @default(0)
+  starRate Float @default(0)
   additionalInfos AdditionalInfo[]
   orderProduct OrderProduct[]
   wishList WishList[]
@@ -92,7 +92,7 @@ model Notice {
   id String @id @default(uuid())
   thumbnail String?
   title String
-  Content String
+  content String
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }
@@ -175,7 +175,7 @@ model Comment {
   userId String
   productId String
   parentId String?
-  starRate Int @default(0)
+  starRate Float
   user User @relation(fields: [userId], references: [id])
   product Product @relation(fields: [productId], references: [id])
   parent Comment? @relation("CommentSelf", fields: [parentId], references: [id])
