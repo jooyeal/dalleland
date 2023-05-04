@@ -1,12 +1,28 @@
 import "@/styles/globals.css";
 import type { AppProps } from "next/app";
 import { trpc } from "../utils/trpc";
-import { ChakraProvider } from "@chakra-ui/react";
+import { ChakraProvider, extendTheme } from "@chakra-ui/react";
+import { SessionProvider } from "next-auth/react";
 
-export default trpc.withTRPC(function App({ Component, pageProps }: AppProps) {
+const theme = extendTheme({
+  components: {
+    Input: {
+      defaultProps: {
+        focusBorderColor: "black",
+      },
+    },
+  },
+});
+
+export default trpc.withTRPC(function App({
+  Component,
+  pageProps: { session, ...pageProps },
+}: AppProps) {
   return (
-    <ChakraProvider>
-      <Component {...pageProps} />
-    </ChakraProvider>
+    <SessionProvider session={session}>
+      <ChakraProvider theme={theme}>
+        <Component {...pageProps} />
+      </ChakraProvider>
+    </SessionProvider>
   );
 });

@@ -1,9 +1,19 @@
 import { PrismaClient } from "@prisma/client";
 import NextAuth, { NextAuthOptions } from "next-auth";
+import { PrismaAdapter } from "@next-auth/prisma-adapter";
 import CredentialsProvider from "next-auth/providers/credentials";
+import GoogleProvider from "next-auth/providers/google";
+
+const prisma = new PrismaClient();
 
 const authOptions: NextAuthOptions = {
+  adapter: PrismaAdapter(prisma),
   providers: [
+    GoogleProvider({
+      id: "google",
+      clientId: process.env.GOOGLE_CLIENT_ID || "",
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || "",
+    }),
     CredentialsProvider({
       type: "credentials",
       credentials: {
@@ -12,10 +22,7 @@ const authOptions: NextAuthOptions = {
       },
 
       async authorize(credentials, req) {
-        const prisma = new PrismaClient();
-        const user = await prisma.user.findFirst({
-          where: { email: credentials?.email, password: credentials?.password },
-        });
+        const user = null;
 
         if (user) {
           return user;
@@ -31,6 +38,9 @@ const authOptions: NextAuthOptions = {
     },
   },
   secret: process.env.NEXTAUTH_SECRET,
+  pages: {
+    signIn: "/signin",
+  },
 };
 
 export default NextAuth(authOptions);
