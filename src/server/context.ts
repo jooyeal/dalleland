@@ -1,12 +1,25 @@
-import { PrismaClient } from "@prisma/client";
 import * as trpc from "@trpc/server";
 import * as trpcNext from "@trpc/server/adapters/next";
-import { getSession } from "next-auth/react";
+import { getServerSession } from "next-auth";
 
-export async function createContext(opts?: trpcNext.CreateNextContextOptions) {
-  const prisma = new PrismaClient();
-  const session = await getSession({ req: opts?.req });
-  return { prisma, session };
-}
+import { authOptions as nextAuthOptions } from "../pages/api/auth/[...nextauth]";
+import { prisma } from "@/utils/db";
+
+export const createContext = async (
+  opts?: trpcNext.CreateNextContextOptions
+) => {
+  const req = opts?.req;
+  const res = opts?.res;
+
+  const session =
+    req && res && (await getServerSession(req, res, nextAuthOptions));
+
+  return {
+    req,
+    res,
+    session,
+    prisma,
+  };
+};
 
 export type Context = trpc.inferAsyncReturnType<typeof createContext>;

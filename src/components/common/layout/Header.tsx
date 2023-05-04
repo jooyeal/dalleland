@@ -11,15 +11,17 @@ import React from "react";
 import { BiCart, BiHeart, BiMenu, BiSearch, BiUser } from "react-icons/bi";
 import SearchModal from "./SearchModal";
 import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/router";
+import { trpc } from "@/utils/trpc";
 
 /**
  * Header component
  */
 const Header: React.FC = () => {
   const { isOpen, onOpen, onClose } = useDisclosure();
-  const { status } = useSession();
-  const router = useRouter();
+  const { status, data } = useSession();
+  const { data: userData } = trpc.user.getUserByEmail.useQuery({
+    email: data?.user?.email || "",
+  });
 
   return (
     <div className="h-16 flex justify-between items-center pl-6 pr-6 shadow-sm">
@@ -67,9 +69,11 @@ const Header: React.FC = () => {
                     <MenuItem>Profile</MenuItem>
                   </Link>
                   {/* Admin */}
-                  <Link href="/admin">
-                    <MenuItem>Admin</MenuItem>
-                  </Link>
+                  {userData?.isAdmin && (
+                    <Link href="/admin">
+                      <MenuItem>Admin</MenuItem>
+                    </Link>
+                  )}
                   {/* Logout */}
                   <MenuItem onClick={() => signOut()}>Logout</MenuItem>
                 </>
