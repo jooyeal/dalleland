@@ -73,7 +73,9 @@ const SearchModal: React.FC<SearchModalProps> = ({ isOpen, onClose }) => {
       <ModalContent>
         <ModalHeader>
           <InputGroup>
-            <InputLeftElement children={<BiSearch />} />
+            <InputLeftElement>
+              <BiSearch />
+            </InputLeftElement>
             <Input
               variant="flushed"
               focusBorderColor="black"
