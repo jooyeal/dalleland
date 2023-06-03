@@ -2,9 +2,15 @@ import { IconButton } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
 import React, { useState } from "react";
-import { IconType } from "react-icons";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
 import { RxDashboard } from "react-icons/rx";
+import {
+  BsBarChart,
+  BsBell,
+  BsBoxSeam,
+  BsClipboardCheck,
+} from "react-icons/bs";
+import { BiCategory, BiDotsHorizontalRounded, BiUser } from "react-icons/bi";
 
 type TSideMenuItem = {
   // Display title
@@ -44,7 +50,7 @@ const SideMenuItem: React.FC<TSideMenuItem> = ({
         <IconButton
           aria-label=""
           size="sm"
-          variant={router.pathname === href ? "solid" : "ghost"}
+          variant={router.pathname === href ? "solid" : "outline"}
           colorScheme="teal"
         >
           {icon}
@@ -81,43 +87,43 @@ const SideMenu = () => {
           title="Dashboard"
           href="/admin"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BsBarChart />}
         />
         <SideMenuItem
           title="Orders"
-          href="/order"
+          href="/admin/order"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BsClipboardCheck />}
         />
         <SideMenuItem
           title="Products"
-          href="/product"
+          href="/admin/product"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BsBoxSeam />}
         />
         <SideMenuItem
           title="Categories"
-          href="/category"
+          href="/admin/category"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BiCategory />}
         />
         <SideMenuItem
           title="Users"
-          href="/user"
+          href="/admin/user"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BiUser />}
         />
         <SideMenuItem
           title="Notices"
-          href="/notice"
+          href="/admin/notice"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BsBell />}
         />
         <SideMenuItem
           title="General"
-          href="/general"
+          href="/admin/general"
           opened={opened}
-          icon={<RxDashboard />}
+          icon={<BiDotsHorizontalRounded />}
         />
       </div>
     </div>

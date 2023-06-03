@@ -1,11 +1,10 @@
-import Layout from "@/components/common/layout/Layout";
 import React from "react";
 
 /**
  * Main admin page
  */
 const Admin = () => {
-  return <Layout>admin</Layout>;
+  return <div>admin</div>;
 };
 
 export default Admin;
