@@ -7,6 +7,12 @@ module.exports = {
   ],
   theme: {
     extend: {
+      width: {
+        "sidemenu-opened": "13rem",
+        "sidemenu-closed": "3.5rem",
+        "admin-layout-sidemenu-opened": "calc(100vw - 13rem)",
+        "admin-layout-sidemenu-closed": "calc(100vw - 3.5rem)",
+      },
       backgroundImage: {
         "gradient-radial": "radial-gradient(var(--tw-gradient-stops))",
         "gradient-conic":

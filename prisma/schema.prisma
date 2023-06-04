@@ -163,6 +163,7 @@ model Category {
   comment String?
   parentId String?
   isPromotion Boolean @default(false)
+  depth Int @default(0)
   parent Category? @relation("CategorySelf", fields: [parentId], references: [id])
   child Category[] @relation("CategorySelf")
   product Product[]

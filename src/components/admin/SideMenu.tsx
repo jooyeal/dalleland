@@ -1,9 +1,8 @@
 import { IconButton } from "@chakra-ui/react";
 import Link from "next/link";
 import { useRouter } from "next/router";
-import React, { useState } from "react";
+import React from "react";
 import { AiOutlineClose, AiOutlineMenu } from "react-icons/ai";
-import { RxDashboard } from "react-icons/rx";
 import {
   BsBarChart,
   BsBell,
@@ -12,7 +11,12 @@ import {
 } from "react-icons/bs";
 import { BiCategory, BiDotsHorizontalRounded, BiUser } from "react-icons/bi";
 
-type TSideMenuItem = {
+type TSideMenuProps = {
+  opened: boolean;
+  onToggle: () => void;
+};
+
+type TSideMenuItemProps = {
   // Display title
   title: string;
   // Link destination
@@ -26,7 +30,7 @@ type TSideMenuItem = {
 /**
  * Side menu item component
  */
-const SideMenuItem: React.FC<TSideMenuItem> = ({
+const SideMenuItem: React.FC<TSideMenuItemProps> = ({
   title,
   href,
   opened,
@@ -63,12 +67,11 @@ const SideMenuItem: React.FC<TSideMenuItem> = ({
 /**
  * Admin page side menu component
  */
-const SideMenu = () => {
-  const [opened, setOpened] = useState<boolean>(true);
+const SideMenu = ({ opened, onToggle }: TSideMenuProps) => {
   return (
     <div
       className={`hidden sm:block p-3 ${
-        opened ? "w-52" : "w-14"
+        opened ? "w-sidemenu-opened" : "w-sidemenu-closed"
       } transition-all`}
     >
       <div className={`flex ${opened ? "justify-end" : "justify-center"}`}>
@@ -77,7 +80,7 @@ const SideMenu = () => {
           size="sm"
           variant="ghost"
           colorScheme="teal"
-          onClick={() => setOpened((prev) => !prev)}
+          onClick={onToggle}
         >
           {opened ? <AiOutlineClose /> : <AiOutlineMenu />}
         </IconButton>
