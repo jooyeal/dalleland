@@ -21,10 +21,10 @@ const Category: NextPage = () => {
       });
     },
     /** The callback function when category creating is failed */
-    onError: () => {
+    onError: (error) => {
       toast({
         status: "error",
-        title: "Failed",
+        title: error.message,
       });
     },
   });

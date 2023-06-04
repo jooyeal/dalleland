@@ -24,6 +24,13 @@ export const categoryRouter = router({
           message: "Exceeded the maximum depth allowed for selection",
         });
       } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Server error",
@@ -113,6 +120,13 @@ export const categoryRouter = router({
       });
       return categories;
     } catch (e) {
+      /** if error is occured by TRPC */
+      if (e instanceof TRPCError) {
+        throw new TRPCError({
+          code: e.code,
+          message: e.message,
+        });
+      }
       throw new TRPCError({
         code: "INTERNAL_SERVER_ERROR",
         message: "Server error",

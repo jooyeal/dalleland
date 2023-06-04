@@ -11,6 +11,13 @@ export const userRouter = router({
         const user = await ctx.prisma.user.findUnique({ where: { email } });
         return user;
       } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
         throw new TRPCError({
           code: "INTERNAL_SERVER_ERROR",
           message: "Server error",
