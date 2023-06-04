@@ -12,7 +12,7 @@ const Layout: React.FC<Props> = ({ children }) => {
   return (
     <div>
       <Header />
-      <div className="h-[calc(100vh-4rem)] flex">
+      <div className="h-[calc(100vh-4rem)]">
         <div>{children}</div>
       </div>
     </div>
