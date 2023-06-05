@@ -1,4 +1,9 @@
-import { inputCreateCategory } from "../scheme/categoryScheme";
+import {
+  inputCreateCategory,
+  inputDeleteCategory,
+  inputGetCategory,
+  inputUpdateCategory,
+} from "../scheme/categoryScheme";
 import { authenticatedProcedure, publicProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
@@ -133,4 +138,116 @@ export const categoryRouter = router({
       });
     }
   }),
+  /** get category by id */
+  getCategory: authenticatedProcedure
+    .input(inputGetCategory)
+    .query(async ({ input, ctx }) => {
+      try {
+        const { id } = input;
+        if (!id) return null;
+        const category = await ctx.prisma.category.findUnique({
+          where: { id },
+          include: {
+            parent: {
+              select: {
+                name: true,
+              },
+            },
+          },
+        });
+        return category;
+      } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error",
+        });
+      }
+    }),
+  /** update category */
+  updateCategory: authenticatedProcedure
+    .input(inputUpdateCategory)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const { id, parentId, name, comment, depth, isPromotion } = input;
+        /** throw error when move to self */
+        if (id === parentId)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Can not move to same category",
+          });
+
+        /** maximum depth is 6 */
+        if (depth < 7) {
+          const category = await ctx.prisma.category.update({
+            where: {
+              id,
+            },
+            data: {
+              parentId,
+              name,
+              comment,
+              depth,
+              isPromotion,
+            },
+          });
+          return category;
+        }
+        /** throw error when depth is exceeded maximum number */
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Exceeded the maximum depth allowed for selection",
+        });
+      } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error",
+        });
+      }
+    }),
+  /** delete category */
+  deleteCategory: authenticatedProcedure
+    .input(inputDeleteCategory)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const { id } = input;
+        if (!id)
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Please select category",
+          });
+
+        const category = await ctx.prisma.category.delete({
+          where: {
+            id,
+          },
+        });
+        return category;
+      } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error",
+        });
+      }
+    }),
 });

@@ -6,7 +6,7 @@ import { BsCaretDown, BsCaretRight } from "react-icons/bs";
 export type TCategoryWithChild = Category & { child: TCategoryWithChild[] };
 export type TTreeNodeControl = {
   selectedId: string | null;
-  onSelect: (id: string | null, depth: number) => void;
+  onSelect: (id: string | null, depth: number, name: string) => void;
 };
 
 type TTreeNodeProps = TCategoryWithChild & TTreeNodeControl;
@@ -38,9 +38,9 @@ const TreeNode: React.FC<TTreeNodeProps> = ({
         }}
         onClick={() => {
           if (selectedId === id) {
-            onSelect && onSelect(null, 0);
+            onSelect && onSelect(null, 0, "");
           } else {
-            onSelect && onSelect(id, depth);
+            onSelect && onSelect(id, depth, name);
           }
         }}
       >

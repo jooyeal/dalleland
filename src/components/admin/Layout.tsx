@@ -17,8 +17,8 @@ const Layout = ({ children }: Props) => {
         <div
           className={`p-4 ${
             opened
-              ? "w-admin-layout-sidemenu-opened"
-              : "w-admin-layout-sidemenu-closed"
+              ? "sm:w-admin-layout-sidemenu-opened"
+              : "sm:w-admin-layout-sidemenu-closed"
           } transition-all`}
         >
           {children}

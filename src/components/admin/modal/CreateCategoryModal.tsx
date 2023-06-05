@@ -1,6 +1,6 @@
+import { TCategoryWithChild } from "@/components/common/combine/TreeNode";
 import TreeView from "@/components/common/combine/TreeView";
 import { TInputCreateCategory } from "@/server/scheme/categoryScheme";
-import { trpc } from "@/utils/trpc";
 import {
   Button,
   ButtonGroup,
@@ -13,58 +13,51 @@ import {
   ModalOverlay,
   Text,
 } from "@chakra-ui/react";
-import { useForm } from "react-hook-form";
+import { UseFormReturn } from "react-hook-form";
 
 /**
  * Create new category modal component
  */
 const CreateCategoryModal: React.FC<
   TModalProps & {
-    onClickConfirm: (
-      { name }: TInputCreateCategory,
-      { onSuccess }: TCallback
-    ) => void;
+    categories: TCategoryWithChild[] | undefined;
+    onClickConfirm: (data: TInputCreateCategory) => void;
+    formControl: UseFormReturn<
+      {
+        name: string;
+        parentId: string | null;
+        parentDepth: number;
+      },
+      any,
+      undefined
+    >;
+    type?: "create" | "select";
   }
-> = ({ isOpen, onClose, onClickConfirm }) => {
-  /** form data control */
-  const { register, handleSubmit, reset, setValue, watch } = useForm<{
-    name: string;
-    parentId: string | null;
-    parentDepth: number;
-  }>({
-    defaultValues: {
-      parentId: null,
-      parentDepth: 0,
-    },
-  });
-
-  /** TRPC get categories */
-  const { data, refetch } = trpc.category.getCategories.useQuery();
-
-  /** form data reset when modal is closed */
-  const onCloseWithReset = () => {
-    /** close the modal */
-    onClose();
-    /** form data reset */
-    reset();
-    /** retrieve categtory datas  */
-    refetch();
-  };
-
+> = ({
+  formControl: { watch, setValue, register, handleSubmit },
+  categories,
+  isOpen,
+  onClose,
+  onClickConfirm,
+  type,
+}) => {
   return (
-    <Modal isOpen={isOpen} onClose={onCloseWithReset}>
+    <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          <Text>Create new category</Text>
+          <Text>
+            {type === "select" ? "Select category" : "Create new category"}
+          </Text>
         </ModalHeader>
         <ModalBody>
           <TreeView
-            nodes={data}
+            nodes={categories}
             selectedId={watch("parentId")}
-            onSelect={(id, depth) => {
+            onSelect={(id, depth, name) => {
               setValue("parentId", id);
               setValue("parentDepth", depth);
+              type === "select" && setValue("name", name);
             }}
           />
           <Input
@@ -77,21 +70,16 @@ const CreateCategoryModal: React.FC<
             <Button
               colorScheme="teal"
               onClick={handleSubmit((data) => {
-                onClickConfirm(
-                  {
-                    name: data.name,
-                    parentId: data.parentId,
-                    parentDepth: data.parentDepth,
-                  },
-                  {
-                    onSuccess: () => onCloseWithReset(),
-                  }
-                );
+                onClickConfirm({
+                  name: data.name,
+                  parentId: data.parentId,
+                  parentDepth: data.parentDepth,
+                });
               })}
             >
-              Create
+              {type === "select" ? "Ok" : "Create"}
             </Button>
-            <Button onClick={onCloseWithReset}>Cancel</Button>
+            <Button onClick={onClose}>Cancel</Button>
           </ButtonGroup>
         </ModalFooter>
       </ModalContent>
