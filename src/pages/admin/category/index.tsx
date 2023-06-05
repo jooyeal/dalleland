@@ -1,4 +1,5 @@
 import CreateCategoryModal from "@/components/admin/modal/CreateCategoryModal";
+import SelectCategoryModal from "@/components/admin/modal/SelectCategoryModal";
 import TreeView from "@/components/common/combine/TreeView";
 import useCustomToast from "@/hooks/useCustomToast";
 import { trpc } from "@/utils/trpc";
@@ -23,7 +24,9 @@ const Category: NextPage = () => {
   /** Toast message */
   const toast = useCustomToast();
   /** Modal control */
-  const { onOpen, onClose, isOpen } = useDisclosure();
+  const createModal = useDisclosure();
+  const selectModal = useDisclosure();
+
   /** create category form data control */
   const createFormControl = useForm<{
     name: string;
@@ -60,22 +63,23 @@ const Category: NextPage = () => {
     trpc.category.getCategories.useQuery();
 
   /** TRPC get category by id */
-  const { refetch: refetchCategory } = trpc.category.getCategory.useQuery(
-    {
-      id: mutateFormControl.watch("selectedId"),
-    },
-    {
-      onSuccess: (data) => {
-        if (data) {
-          mutateFormControl.setValue("name", data.name);
-          mutateFormControl.setValue("comment", data.comment);
-          mutateFormControl.setValue("parentId", data.parentId);
-          mutateFormControl.setValue("parentName", data.parent?.name ?? null);
-          mutateFormControl.setValue("isPromotion", data.isPromotion);
-        }
+  const { data: categoryData, refetch: refetchCategory } =
+    trpc.category.getCategory.useQuery(
+      {
+        id: mutateFormControl.watch("selectedId"),
       },
-    }
-  );
+      {
+        onSuccess: (data) => {
+          if (data) {
+            mutateFormControl.setValue("name", data.name);
+            mutateFormControl.setValue("comment", data.comment);
+            mutateFormControl.setValue("parentId", data.parentId);
+            mutateFormControl.setValue("parentName", data.parent?.name ?? null);
+            mutateFormControl.setValue("isPromotion", data.isPromotion);
+          }
+        },
+      }
+    );
   /** TRPC create category */
   const { mutate: createMutate } = trpc.category.createCategory.useMutation({
     /** The callback function when category is created successfully */
@@ -83,7 +87,7 @@ const Category: NextPage = () => {
       toast({
         title: "New category is created successfully",
       });
-      onClose();
+      createModal.onClose();
       createFormControl.reset();
       refetch();
     },
@@ -104,7 +108,6 @@ const Category: NextPage = () => {
       toast({
         title: "category is edited successfully",
       });
-      onClose();
       refetch();
       refetchCategory();
     },
@@ -149,7 +152,7 @@ const Category: NextPage = () => {
           size="sm"
           onClick={() => {
             setModalType("create");
-            onOpen();
+            createModal.onOpen();
           }}
         >
           Create
@@ -174,13 +177,13 @@ const Category: NextPage = () => {
             <Input {...mutateFormControl.register("name")} />
           </div>
           <div className="flex w-full items-center gap-2">
-            <Input {...mutateFormControl.register("parentName")} />
+            <Input {...mutateFormControl.register("parentName")} readOnly />
             <Button
               size="sm"
               colorScheme="teal"
               onClick={() => {
                 setModalType("select");
-                onOpen();
+                selectModal.onOpen();
               }}
             >
               Edit
@@ -238,22 +241,32 @@ const Category: NextPage = () => {
       <CreateCategoryModal
         formControl={createFormControl}
         categories={allCategoriesData}
-        isOpen={isOpen}
+        isOpen={createModal.isOpen}
         onClose={() => {
-          onClose();
+          createModal.onClose();
           createFormControl.reset();
         }}
-        onClickConfirm={
-          modalType === "create"
-            ? (data) => createMutate(data)
-            : (data) => {
-                mutateFormControl.setValue("parentId", data.parentId);
-                mutateFormControl.setValue("parentName", data.name);
-                mutateFormControl.setValue("parentDepth", data.parentDepth + 1);
-                onClose();
-              }
-        }
+        onClickConfirm={(data) => createMutate(data)}
         type={modalType}
+      />
+      <SelectCategoryModal
+        formControl={mutateFormControl}
+        categories={allCategoriesData}
+        isOpen={selectModal.isOpen}
+        onClose={() => {
+          mutateFormControl.setValue("parentId", categoryData?.parentId ?? "");
+          mutateFormControl.setValue(
+            "parentName",
+            categoryData?.parent?.name ?? ""
+          );
+          selectModal.onClose();
+        }}
+        onClickConfirm={({ parentId, parentDepth, name }) => {
+          mutateFormControl.setValue("parentId", parentId);
+          mutateFormControl.setValue("parentDepth", parentDepth);
+          mutateFormControl.setValue("parentName", name);
+          selectModal.onClose();
+        }}
       />
     </div>
   );
