@@ -6,7 +6,6 @@ import { trpc } from "@/utils/trpc";
 import {
   Button,
   ButtonGroup,
-  Checkbox,
   Heading,
   Input,
   Switch,
@@ -170,72 +169,89 @@ const Category: NextPage = () => {
           />
         </div>
         <div className="p-4 w-full flex flex-col gap-2">
-          <Text className="border-l-2 border-teal-600 text-lg font-semibold pl-2">
-            Category
-          </Text>
-          <div className="flex w-fullitems-center">
-            <Input {...mutateFormControl.register("name")} />
-          </div>
-          <div className="flex w-full items-center gap-2">
-            <Input {...mutateFormControl.register("parentName")} readOnly />
-            <Button
-              size="sm"
-              colorScheme="teal"
-              onClick={() => {
-                setModalType("select");
-                selectModal.onOpen();
-              }}
-            >
-              Edit
-            </Button>
-          </div>
-          <div className="flex w-fullitems-center">
-            <Textarea
-              {...mutateFormControl.register("comment")}
-              resize="none"
-              focusBorderColor="black"
-            />
-          </div>
-          <div className="flex justify-end items-center gap-2">
-            <Text>Promotion</Text>
-            <Controller
-              control={mutateFormControl.control}
-              name="isPromotion"
-              render={({ field: { onChange, value, ref } }) => (
-                <Switch
-                  isChecked={value}
-                  onChange={onChange}
-                  ref={ref}
-                  colorScheme="teal"
+          {categoryData ? (
+            <>
+              <Text className="border-l-2 border-teal-600 text-lg font-semibold pl-2">
+                Category
+              </Text>
+              <div className="flex flex-col w-full justify-center">
+                <Text>Category name</Text>
+                <Input {...mutateFormControl.register("name")} />
+              </div>
+              <div className="flex flex-col w-full justify-center">
+                <Text>Parent category name</Text>
+                <div className="flex items-center gap-2">
+                  <Input
+                    {...mutateFormControl.register("parentName")}
+                    readOnly
+                  />
+                  <Button
+                    size="sm"
+                    colorScheme="teal"
+                    onClick={() => {
+                      setModalType("select");
+                      selectModal.onOpen();
+                    }}
+                  >
+                    Edit
+                  </Button>
+                </div>
+              </div>
+              <div className="flex flex-col w-full justify-center">
+                <div>
+                  <Text>Comment</Text>
+                  <Textarea
+                    {...mutateFormControl.register("comment")}
+                    resize="none"
+                    focusBorderColor="black"
+                    rows={12}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-end items-center gap-2">
+                <Text>Promotion</Text>
+                <Controller
+                  control={mutateFormControl.control}
+                  name="isPromotion"
+                  render={({ field: { onChange, value, ref } }) => (
+                    <Switch
+                      isChecked={value}
+                      onChange={onChange}
+                      ref={ref}
+                      colorScheme="teal"
+                    />
+                  )}
                 />
-              )}
-            />
 
-            <ButtonGroup>
-              <Button
-                colorScheme="teal"
-                onClick={mutateFormControl.handleSubmit((data) => {
-                  const { selectedId, parentDepth, ...rest } = data;
-                  selectedId &&
-                    updateMutate({
-                      id: selectedId,
-                      depth: parentDepth,
-                      ...rest,
-                    });
-                })}
-              >
-                Save
-              </Button>
-              <Button
-                colorScheme="red"
-                onClick={mutateFormControl.handleSubmit((data) =>
-                  deleteMutate({ id: data.selectedId })
-                )}
-              >
-                Delete
-              </Button>
-            </ButtonGroup>
-          </div>
+                <ButtonGroup>
+                  <Button
+                    colorScheme="teal"
+                    onClick={mutateFormControl.handleSubmit((data) => {
+                      const { selectedId, parentDepth, ...rest } = data;
+                      selectedId &&
+                        updateMutate({
+                          id: selectedId,
+                          depth: parentDepth,
+                          ...rest,
+                        });
+                    })}
+                  >
+                    Save
+                  </Button>
+                  <Button
+                    colorScheme="red"
+                    onClick={mutateFormControl.handleSubmit((data) =>
+                      deleteMutate({ id: data.selectedId })
+                    )}
+                  >
+                    Delete
+                  </Button>
+                </ButtonGroup>
+              </div>
+            </>
+          ) : (
+            <Text className="font-semibold">Please select category</Text>
+          )}
         </div>
       </div>
       <CreateCategoryModal
