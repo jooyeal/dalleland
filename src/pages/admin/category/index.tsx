@@ -270,10 +270,13 @@ const Category: NextPage = () => {
         categories={allCategoriesData}
         isOpen={selectModal.isOpen}
         onClose={() => {
-          mutateFormControl.setValue("parentId", categoryData?.parentId ?? "");
+          mutateFormControl.setValue(
+            "parentId",
+            categoryData?.parentId ?? null
+          );
           mutateFormControl.setValue(
             "parentName",
-            categoryData?.parent?.name ?? ""
+            categoryData?.parent?.name ?? null
           );
           selectModal.onClose();
         }}
