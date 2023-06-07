@@ -50,7 +50,7 @@ const Category: NextPage = () => {
   const {
     data: allCategoriesData,
     refetch: refetchAllCategories,
-    isFetching: allCategoriesDataIsFetching,
+    isLoading: allCategoriesDataIsLoading,
   } = trpc.category.getCategories.useQuery();
 
   /** TRPC get category by id */
@@ -133,7 +133,7 @@ const Category: NextPage = () => {
       </div>
       <div className="block sm:flex">
         <div className="w-96 p-4">
-          <Skeleton isLoaded={!allCategoriesDataIsFetching}>
+          <Skeleton isLoaded={!allCategoriesDataIsLoading}>
             <TreeView
               nodes={allCategoriesData}
               selectedId={watch("selectedId")}
