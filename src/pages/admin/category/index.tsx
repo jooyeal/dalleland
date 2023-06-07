@@ -133,7 +133,7 @@ const Category: NextPage = () => {
       </div>
       <div className="block sm:flex">
         <div className="w-96 p-4">
-          <Skeleton isLoaded={allCategoriesDataIsLoading}>
+          <Skeleton isLoaded={!allCategoriesDataIsLoading}>
             <TreeView
               nodes={allCategoriesData}
               selectedId={watch("selectedId")}
