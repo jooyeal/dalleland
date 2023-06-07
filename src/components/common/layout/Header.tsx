@@ -24,7 +24,7 @@ const Header: React.FC = () => {
   });
 
   return (
-    <div className="h-16 flex justify-between items-center pl-6 pr-6 shadow-sm">
+    <div className="sticky top-0 h-16 flex justify-between items-center pl-6 pr-6 shadow-sm bg-white z-50">
       {/* Menu Icon */}
       <BiMenu className="text-2xl sm:hidden" />
       {/* Logo */}

@@ -1,6 +1,5 @@
-import { TCategoryWithChild } from "@/components/common/combine/TreeNode";
 import TreeView from "@/components/common/combine/TreeView";
-import { TInputCreateCategory } from "@/server/scheme/categoryScheme";
+import { trpc } from "@/utils/trpc";
 import {
   Button,
   ButtonGroup,
@@ -20,11 +19,19 @@ import { useState } from "react";
  */
 const SelectCategoryModal: React.FC<
   TModalProps & {
-    categories: TCategoryWithChild[] | undefined;
-    onClickConfirm: (data: TInputCreateCategory) => void;
+    onClickConfirm: (data: {
+      name: string;
+      id: string | null;
+      depth: number;
+    }) => void;
   }
-> = ({ categories, isOpen, onClose, onClickConfirm }) => {
-  const [data, setData] = useState<TInputCreateCategory | null>(null);
+> = ({ isOpen, onClose, onClickConfirm }) => {
+  const { data: allCategories } = trpc.category.getCategories.useQuery();
+  const [data, setData] = useState<{
+    name: string;
+    id: string | null;
+    depth: number;
+  } | null>(null);
 
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
@@ -34,14 +41,14 @@ const SelectCategoryModal: React.FC<
           <Text>Select category</Text>
         </ModalHeader>
         <ModalBody>
-          <Skeleton isLoaded={categories ? true : false}>
+          <Skeleton isLoaded={allCategories ? true : false}>
             <TreeView
-              nodes={categories}
-              selectedId={data?.parentId ?? null}
+              nodes={allCategories}
+              selectedId={data?.id ?? null}
               onSelect={(id, depth, name) => {
                 setData({
-                  parentId: id,
-                  parentDepth: depth + 1,
+                  id,
+                  depth: depth + 1,
                   name: name,
                 });
               }}

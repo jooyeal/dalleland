@@ -4,7 +4,7 @@ import { trpc } from "../utils/trpc";
 import { ChakraProvider, extendTheme } from "@chakra-ui/react";
 import { SessionProvider } from "next-auth/react";
 import Layout from "@/components/common/layout/Layout";
-import AdminLayout from "@/components/admin/Layout";
+import AdminLayout from "@/components/admin/layout/Layout";
 import { useRouter } from "next/router";
 
 const theme = extendTheme({

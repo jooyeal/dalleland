@@ -1,6 +1,6 @@
 import React, { useState } from "react";
-import SideMenu from "./SideMenu";
-import Header from "../common/layout/Header";
+import SideMenu from "../SideMenu";
+import Header from "../../common/layout/Header";
 
 type Props = {
   children: React.ReactNode;

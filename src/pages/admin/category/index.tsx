@@ -1,3 +1,4 @@
+import HeadSection from "@/components/admin/layout/HeadSection";
 import CreateCategoryModal from "@/components/admin/modal/CreateCategoryModal";
 import SelectCategoryModal from "@/components/admin/modal/SelectCategoryModal";
 import TreeView from "@/components/common/combine/TreeView";
@@ -6,7 +7,6 @@ import { trpc } from "@/utils/trpc";
 import {
   Button,
   ButtonGroup,
-  Heading,
   Input,
   Skeleton,
   Switch,
@@ -119,18 +119,13 @@ const Category: NextPage = () => {
 
   return (
     <div>
-      <div className="flex justify-between w-full mb-10">
-        <Heading size="lg">Categories</Heading>
-        <Button
-          colorScheme="teal"
-          size="sm"
-          onClick={() => {
-            createModal.onOpen();
-          }}
-        >
-          Create
-        </Button>
-      </div>
+      <HeadSection
+        title="Categories"
+        buttonTitle="Create"
+        onClick={() => {
+          createModal.onOpen();
+        }}
+      />
       <div className="block sm:flex">
         <div className="w-96 p-4">
           <Skeleton isLoaded={!allCategoriesDataIsLoading}>
@@ -237,16 +232,15 @@ const Category: NextPage = () => {
         onClickConfirm={() => refetchAllCategories()}
       />
       <SelectCategoryModal
-        categories={allCategoriesData}
         isOpen={selectModal.isOpen}
         onClose={() => {
           setValue("parentId", categoryData?.parentId ?? null);
           setValue("parentName", categoryData?.parent?.name ?? null);
           selectModal.onClose();
         }}
-        onClickConfirm={({ parentId, parentDepth, name }) => {
-          setValue("parentId", parentId);
-          setValue("parentDepth", parentDepth);
+        onClickConfirm={({ id, depth, name }) => {
+          setValue("parentId", id);
+          setValue("parentDepth", depth);
           setValue("parentName", name);
           selectModal.onClose();
         }}
