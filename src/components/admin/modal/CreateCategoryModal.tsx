@@ -1,6 +1,7 @@
 import { TCategoryWithChild } from "@/components/common/combine/TreeNode";
 import TreeView from "@/components/common/combine/TreeView";
-import { TInputCreateCategory } from "@/server/scheme/categoryScheme";
+import useCustomToast from "@/hooks/useCustomToast";
+import { trpc } from "@/utils/trpc";
 import {
   Button,
   ButtonGroup,
@@ -11,9 +12,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Skeleton,
   Text,
 } from "@chakra-ui/react";
-import { UseFormReturn } from "react-hook-form";
+import { useForm } from "react-hook-form";
 
 /**
  * Create new category modal component
@@ -21,63 +23,76 @@ import { UseFormReturn } from "react-hook-form";
 const CreateCategoryModal: React.FC<
   TModalProps & {
     categories: TCategoryWithChild[] | undefined;
-    onClickConfirm: (data: TInputCreateCategory) => void;
-    formControl: UseFormReturn<
-      {
-        name: string;
-        parentId: string | null;
-        parentDepth: number;
-      },
-      any,
-      undefined
-    >;
-    type?: "create" | "select";
+    onClickConfirm: () => void;
   }
-> = ({
-  formControl: { watch, setValue, register, handleSubmit },
-  categories,
-  isOpen,
-  onClose,
-  onClickConfirm,
-  type,
-}) => {
+> = ({ categories, isOpen, onClose, onClickConfirm }) => {
+  /** Toast message */
+  const toast = useCustomToast();
+
+  /** create category form data control */
+  const { watch, setValue, register, handleSubmit, reset } = useForm<{
+    name: string;
+    parentId: string | null;
+    parentDepth: number;
+  }>({
+    defaultValues: {
+      parentId: null,
+      parentDepth: 0,
+    },
+  });
+
+  /** TRPC create category */
+  const { mutate } = trpc.category.createCategory.useMutation({
+    /** The callback function when category is created successfully */
+    onSuccess: () => {
+      toast({
+        title: "New category is created successfully",
+      });
+      reset();
+      onClose();
+      onClickConfirm();
+    },
+    /** The callback function when category creating is failed */
+    onError: (error) => {
+      toast({
+        status: "error",
+        title: error.message,
+      });
+    },
+  });
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          <Text>
-            {type === "select" ? "Select category" : "Create new category"}
-          </Text>
+          <Text>Create new category</Text>
         </ModalHeader>
         <ModalBody>
-          <TreeView
-            nodes={categories}
-            selectedId={watch("parentId")}
-            onSelect={(id, depth, name) => {
-              setValue("parentId", id);
-              setValue("parentDepth", depth);
-              type === "select" && setValue("name", name);
-            }}
-          />
-          <Input
-            {...register("name")}
-            placeholder="please input category name"
-          />
+          <Skeleton isLoaded={categories ? true : false}>
+            <TreeView
+              nodes={categories}
+              selectedId={watch("parentId")}
+              onSelect={(id, depth) => {
+                setValue("parentId", id);
+                setValue("parentDepth", depth);
+              }}
+            />
+            <Input
+              {...register("name")}
+              placeholder="please input category name"
+            />
+          </Skeleton>
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>
             <Button
               colorScheme="teal"
               onClick={handleSubmit((data) => {
-                onClickConfirm({
-                  name: data.name,
-                  parentId: data.parentId,
-                  parentDepth: data.parentDepth,
-                });
+                mutate(data);
               })}
             >
-              {type === "select" ? "Ok" : "Create"}
+              Create
             </Button>
             <Button onClick={onClose}>Cancel</Button>
           </ButtonGroup>

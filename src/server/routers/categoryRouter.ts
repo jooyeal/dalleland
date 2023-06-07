@@ -14,7 +14,12 @@ export const categoryRouter = router({
     .mutation(async ({ input, ctx }) => {
       try {
         const { name, parentId, parentDepth } = input;
-
+        if (!name) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Please input category name",
+          });
+        }
         /** maximum depth is 6 */
         if (parentDepth < 6) {
           const newCategory = await ctx.prisma.category.create({
@@ -122,6 +127,9 @@ export const categoryRouter = router({
             },
           },
         },
+        orderBy: {
+          name: "asc",
+        },
       });
       return categories;
     } catch (e) {
@@ -182,6 +190,13 @@ export const categoryRouter = router({
             code: "BAD_REQUEST",
             message: "Can not move to same category",
           });
+        /** throw error when name is empty */
+        if (!name) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Please input category name",
+          });
+        }
 
         /** maximum depth is 6 */
         if (depth < 7) {

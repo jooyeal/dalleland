@@ -10,10 +10,10 @@ import {
   ModalFooter,
   ModalHeader,
   ModalOverlay,
+  Skeleton,
   Text,
 } from "@chakra-ui/react";
 import { useState } from "react";
-import { UseFormReturn } from "react-hook-form";
 
 /**
  * Create new category modal component
@@ -22,27 +22,8 @@ const SelectCategoryModal: React.FC<
   TModalProps & {
     categories: TCategoryWithChild[] | undefined;
     onClickConfirm: (data: TInputCreateCategory) => void;
-    formControl: UseFormReturn<
-      {
-        name: string;
-        comment: string | null;
-        selectedId: string | null;
-        parentId: string | null;
-        parentName: string | null;
-        parentDepth: number;
-        isPromotion: boolean;
-      },
-      any,
-      undefined
-    >;
   }
-> = ({
-  formControl: { watch, setValue, handleSubmit },
-  categories,
-  isOpen,
-  onClose,
-  onClickConfirm,
-}) => {
+> = ({ categories, isOpen, onClose, onClickConfirm }) => {
   const [data, setData] = useState<TInputCreateCategory | null>(null);
 
   return (
@@ -53,17 +34,19 @@ const SelectCategoryModal: React.FC<
           <Text>Select category</Text>
         </ModalHeader>
         <ModalBody>
-          <TreeView
-            nodes={categories}
-            selectedId={data?.parentId ?? null}
-            onSelect={(id, depth, name) => {
-              setData({
-                parentId: id,
-                parentDepth: depth + 1,
-                name: name,
-              });
-            }}
-          />
+          <Skeleton isLoaded={categories ? true : false}>
+            <TreeView
+              nodes={categories}
+              selectedId={data?.parentId ?? null}
+              onSelect={(id, depth, name) => {
+                setData({
+                  parentId: id,
+                  parentDepth: depth + 1,
+                  name: name,
+                });
+              }}
+            />
+          </Skeleton>
         </ModalBody>
         <ModalFooter>
           <ButtonGroup>

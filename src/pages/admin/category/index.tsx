@@ -8,37 +8,26 @@ import {
   ButtonGroup,
   Heading,
   Input,
+  Skeleton,
   Switch,
   Text,
   Textarea,
   useDisclosure,
 } from "@chakra-ui/react";
 import { NextPage } from "next";
-import React, { useState } from "react";
+import React from "react";
 import { Controller, useForm } from "react-hook-form";
 
 /** Categories Page */
 const Category: NextPage = () => {
-  const [modalType, setModalType] = useState<"create" | "select">();
   /** Toast message */
   const toast = useCustomToast();
   /** Modal control */
   const createModal = useDisclosure();
   const selectModal = useDisclosure();
 
-  /** create category form data control */
-  const createFormControl = useForm<{
-    name: string;
-    parentId: string | null;
-    parentDepth: number;
-  }>({
-    defaultValues: {
-      parentId: null,
-      parentDepth: 0,
-    },
-  });
   /** edit category, delete category form data control */
-  const mutateFormControl = useForm<{
+  const { setValue, watch, reset, handleSubmit, register, control } = useForm<{
     name: string;
     comment: string | null;
     selectedId: string | null;
@@ -58,47 +47,33 @@ const Category: NextPage = () => {
     },
   });
   /** TRPC get categories */
-  const { data: allCategoriesData, refetch } =
-    trpc.category.getCategories.useQuery();
+  const {
+    data: allCategoriesData,
+    refetch: refetchAllCategories,
+    isLoading: allCategoriesDataIsLoading,
+  } = trpc.category.getCategories.useQuery();
 
   /** TRPC get category by id */
-  const { data: categoryData, refetch: refetchCategory } =
-    trpc.category.getCategory.useQuery(
-      {
-        id: mutateFormControl.watch("selectedId"),
+  const {
+    data: categoryData,
+    refetch: refetchCategory,
+    isLoading: categoryDataIsLoading,
+  } = trpc.category.getCategory.useQuery(
+    {
+      id: watch("selectedId"),
+    },
+    {
+      onSuccess: (data) => {
+        if (data) {
+          setValue("name", data.name);
+          setValue("comment", data.comment);
+          setValue("parentId", data.parentId);
+          setValue("parentName", data.parent?.name ?? null);
+          setValue("isPromotion", data.isPromotion);
+        }
       },
-      {
-        onSuccess: (data) => {
-          if (data) {
-            mutateFormControl.setValue("name", data.name);
-            mutateFormControl.setValue("comment", data.comment);
-            mutateFormControl.setValue("parentId", data.parentId);
-            mutateFormControl.setValue("parentName", data.parent?.name ?? null);
-            mutateFormControl.setValue("isPromotion", data.isPromotion);
-          }
-        },
-      }
-    );
-  /** TRPC create category */
-  const { mutate: createMutate } = trpc.category.createCategory.useMutation({
-    /** The callback function when category is created successfully */
-    onSuccess: () => {
-      toast({
-        title: "New category is created successfully",
-      });
-      createModal.onClose();
-      createFormControl.reset();
-      refetch();
-    },
-    /** The callback function when category creating is failed */
-    onError: (error) => {
-      toast({
-        status: "error",
-        title: error.message,
-      });
-      refetch();
-    },
-  });
+    }
+  );
 
   /** TRPC update category */
   const { mutate: updateMutate } = trpc.category.updateCategory.useMutation({
@@ -107,7 +82,7 @@ const Category: NextPage = () => {
       toast({
         title: "category is edited successfully",
       });
-      refetch();
+      refetchAllCategories();
       refetchCategory();
     },
     /** The callback function when category updating is failed */
@@ -116,7 +91,7 @@ const Category: NextPage = () => {
         status: "error",
         title: error.message,
       });
-      refetch();
+      refetchAllCategories();
       refetchCategory();
     },
   });
@@ -127,8 +102,8 @@ const Category: NextPage = () => {
       toast({
         title: "category is deleted successfully",
       });
-      refetch();
-      mutateFormControl.reset();
+      refetchAllCategories();
+      reset();
       refetchCategory();
     },
     /** The callback function when category deleting is failed */
@@ -137,7 +112,7 @@ const Category: NextPage = () => {
         status: "error",
         title: error.message,
       });
-      refetch();
+      refetchAllCategories();
       refetchCategory();
     },
   });
@@ -150,7 +125,6 @@ const Category: NextPage = () => {
           colorScheme="teal"
           size="sm"
           onClick={() => {
-            setModalType("create");
             createModal.onOpen();
           }}
         >
@@ -159,37 +133,38 @@ const Category: NextPage = () => {
       </div>
       <div className="block sm:flex">
         <div className="w-96 p-4">
-          <TreeView
-            nodes={allCategoriesData}
-            selectedId={mutateFormControl.watch("selectedId")}
-            onSelect={(id, depth) => {
-              mutateFormControl.setValue("selectedId", id);
-              mutateFormControl.setValue("parentDepth", depth);
-            }}
-          />
+          <Skeleton isLoaded={!allCategoriesDataIsLoading}>
+            <TreeView
+              nodes={allCategoriesData}
+              selectedId={watch("selectedId")}
+              onSelect={(id, depth) => {
+                setValue("selectedId", id);
+                setValue("parentDepth", depth);
+              }}
+            />
+          </Skeleton>
         </div>
-        <div className="p-4 w-full flex flex-col gap-2">
-          {categoryData ? (
-            <>
-              <Text className="border-l-2 border-teal-600 text-lg font-semibold pl-2">
+        <div className="p-4 w-full">
+          {watch("selectedId") ? (
+            <Skeleton
+              isLoaded={!categoryDataIsLoading}
+              className="flex flex-col gap-2"
+            >
+              <Text className="border-l-4 border-teal-600 text-lg font-semibold pl-2">
                 Category
               </Text>
               <div className="flex flex-col w-full justify-center">
-                <Text>Category name</Text>
-                <Input {...mutateFormControl.register("name")} />
+                <Text>Name</Text>
+                <Input {...register("name")} />
               </div>
               <div className="flex flex-col w-full justify-center">
-                <Text>Parent category name</Text>
+                <Text>Parent</Text>
                 <div className="flex items-center gap-2">
-                  <Input
-                    {...mutateFormControl.register("parentName")}
-                    readOnly
-                  />
+                  <Input {...register("parentName")} readOnly />
                   <Button
                     size="sm"
                     colorScheme="teal"
                     onClick={() => {
-                      setModalType("select");
                       selectModal.onOpen();
                     }}
                   >
@@ -201,7 +176,7 @@ const Category: NextPage = () => {
                 <div>
                   <Text>Comment</Text>
                   <Textarea
-                    {...mutateFormControl.register("comment")}
+                    {...register("comment")}
                     resize="none"
                     focusBorderColor="black"
                     rows={12}
@@ -211,7 +186,7 @@ const Category: NextPage = () => {
               <div className="flex justify-end items-center gap-2">
                 <Text>Promotion</Text>
                 <Controller
-                  control={mutateFormControl.control}
+                  control={control}
                   name="isPromotion"
                   render={({ field: { onChange, value, ref } }) => (
                     <Switch
@@ -222,11 +197,10 @@ const Category: NextPage = () => {
                     />
                   )}
                 />
-
                 <ButtonGroup>
                   <Button
                     colorScheme="teal"
-                    onClick={mutateFormControl.handleSubmit((data) => {
+                    onClick={handleSubmit((data) => {
                       const { selectedId, parentDepth, ...rest } = data;
                       selectedId &&
                         updateMutate({
@@ -240,7 +214,7 @@ const Category: NextPage = () => {
                   </Button>
                   <Button
                     colorScheme="red"
-                    onClick={mutateFormControl.handleSubmit((data) =>
+                    onClick={handleSubmit((data) =>
                       deleteMutate({ id: data.selectedId })
                     )}
                   >
@@ -248,42 +222,32 @@ const Category: NextPage = () => {
                   </Button>
                 </ButtonGroup>
               </div>
-            </>
+            </Skeleton>
           ) : (
             <Text className="font-semibold">Please select category</Text>
           )}
         </div>
       </div>
       <CreateCategoryModal
-        formControl={createFormControl}
         categories={allCategoriesData}
         isOpen={createModal.isOpen}
         onClose={() => {
           createModal.onClose();
-          createFormControl.reset();
         }}
-        onClickConfirm={(data) => createMutate(data)}
-        type={modalType}
+        onClickConfirm={() => refetchAllCategories()}
       />
       <SelectCategoryModal
-        formControl={mutateFormControl}
         categories={allCategoriesData}
         isOpen={selectModal.isOpen}
         onClose={() => {
-          mutateFormControl.setValue(
-            "parentId",
-            categoryData?.parentId ?? null
-          );
-          mutateFormControl.setValue(
-            "parentName",
-            categoryData?.parent?.name ?? null
-          );
+          setValue("parentId", categoryData?.parentId ?? null);
+          setValue("parentName", categoryData?.parent?.name ?? null);
           selectModal.onClose();
         }}
         onClickConfirm={({ parentId, parentDepth, name }) => {
-          mutateFormControl.setValue("parentId", parentId);
-          mutateFormControl.setValue("parentDepth", parentDepth);
-          mutateFormControl.setValue("parentName", name);
+          setValue("parentId", parentId);
+          setValue("parentDepth", parentDepth);
+          setValue("parentName", name);
           selectModal.onClose();
         }}
       />
