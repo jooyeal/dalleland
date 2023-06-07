@@ -7,6 +7,10 @@ module.exports = {
   ],
   theme: {
     extend: {
+      spacing: {
+        "admin-layout-sidemenu-opened": "17rem",
+        "admin-layout-sidemenu-closed": "7.5rem",
+      },
       width: {
         "sidemenu-opened": "13rem",
         "sidemenu-closed": "3.5rem",
