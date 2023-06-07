@@ -70,7 +70,7 @@ const SideMenuItem: React.FC<TSideMenuItemProps> = ({
 const SideMenu = ({ opened, onToggle }: TSideMenuProps) => {
   return (
     <div
-      className={`hidden sm:block p-3 border-r h-screen fixed top-16 left-0 ${
+      className={`hidden sm:block p-3 border-r h-screen fixed top-16 left-0 h-screen ${
         opened ? "w-sidemenu-opened" : "w-sidemenu-closed"
       } transition-all`}
     >
