@@ -1,4 +1,10 @@
-import { Modal, ModalContent, ModalOverlay, Spinner } from "@chakra-ui/react";
+import {
+  Modal,
+  ModalBody,
+  ModalContent,
+  ModalOverlay,
+  Spinner,
+} from "@chakra-ui/react";
 import React, { createContext, useState } from "react";
 
 type TLoadingContext = {
@@ -13,9 +19,13 @@ const LoadingProvider: React.FC<{ children: React.ReactNode }> = ({
   const setLoading = (status: boolean) => setIsLoading(status);
   return (
     <LoadingContext.Provider value={{ setLoading }}>
-      <Modal isOpen={isLoading} onClose={() => {}} size="full">
+      <Modal isOpen={isLoading} onClose={() => {}} isCentered>
         <ModalOverlay />
-        <ModalContent>
+        <ModalContent
+          bg=""
+          shadow=""
+          className="flex justify-center items-center"
+        >
           <Spinner size="xl" />
         </ModalContent>
       </Modal>
