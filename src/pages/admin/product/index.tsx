@@ -101,7 +101,7 @@ const Product: NextPage = () => {
           </TableCaption>
           <Thead>
             <Tr>
-              <Th></Th>
+              <Th>thumbnail</Th>
               <Th>name</Th>
               <Th>number</Th>
               <Th>category</Th>
