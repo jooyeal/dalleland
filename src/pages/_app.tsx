@@ -6,6 +6,7 @@ import { SessionProvider } from "next-auth/react";
 import Layout from "@/components/common/layout/Layout";
 import AdminLayout from "@/components/admin/layout/Layout";
 import { useRouter } from "next/router";
+import LoadingProvider from "@/contexts/LoadingProvider";
 
 const theme = extendTheme({
   components: {
@@ -25,15 +26,17 @@ export default trpc.withTRPC(function App({
   return (
     <SessionProvider session={session}>
       <ChakraProvider theme={theme}>
-        {router.pathname.includes("admin") ? (
-          <AdminLayout>
-            <Component {...pageProps} />
-          </AdminLayout>
-        ) : (
-          <Layout>
-            <Component {...pageProps} />
-          </Layout>
-        )}
+        <LoadingProvider>
+          {router.pathname.includes("admin") ? (
+            <AdminLayout>
+              <Component {...pageProps} />
+            </AdminLayout>
+          ) : (
+            <Layout>
+              <Component {...pageProps} />
+            </Layout>
+          )}
+        </LoadingProvider>
       </ChakraProvider>
     </SessionProvider>
   );

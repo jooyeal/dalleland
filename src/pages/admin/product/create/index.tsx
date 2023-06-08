@@ -1,31 +1,43 @@
+import CustomDropzone from "@/components/admin/combine/CustomDropzone";
+import CustomTable from "@/components/admin/combine/CustomTable";
 import AccordionBody from "@/components/admin/layout/AccordionBody";
 import AccordionSection from "@/components/admin/layout/AccordionSection";
 import HeadSection from "@/components/admin/layout/HeadSection";
+import InputAdditionalInfoModal from "@/components/admin/modal/InputAdditionalInfoModal";
 import InputSizeModal from "@/components/admin/modal/InputSizeModal";
 import SelectCategoryModal from "@/components/admin/modal/SelectCategoryModal";
+import { LoadingContext } from "@/contexts/LoadingProvider";
 import useCustomToast from "@/hooks/useCustomToast";
 import { TInputCreateProduct } from "@/server/scheme/productScheme";
 import { trpc } from "@/utils/trpc";
 import {
   Accordion,
   Button,
+  Checkbox,
   Divider,
   Input,
   Switch,
   Text,
   useDisclosure,
 } from "@chakra-ui/react";
+import axios from "axios";
 import { NextPage } from "next";
+import Image from "next/image";
 import { useRouter } from "next/router";
-import React from "react";
+import React, { useContext, useState } from "react";
 import { Controller, useForm } from "react-hook-form";
 
 /** Product create page */
 const ProductCreate: NextPage = () => {
+  const loadingCtx = useContext(LoadingContext);
   const selectCategoryModalControl = useDisclosure();
   const inputSizeModalControl = useDisclosure();
+  const inputAdditionalModalControl = useDisclosure();
   const toast = useCustomToast();
   const router = useRouter();
+  const [selectedFiles, setSelectedFiles] = useState<
+    { file: File; isThumbnail?: boolean }[]
+  >([]);
 
   /** TRPC Create product  */
   const { mutate } = trpc.product.createProduct.useMutation({
@@ -33,9 +45,11 @@ const ProductCreate: NextPage = () => {
       toast({
         title: "New product is created successfully",
       });
+      loadingCtx?.setLoading(false);
       router.push("/admin/product");
     },
     onError: (error) => {
+      loadingCtx?.setLoading(false);
       toast({
         status: "error",
         title: error.message,
@@ -50,11 +64,22 @@ const ProductCreate: NextPage = () => {
         images: [],
         size: [],
         categories: [],
+        additionalInfos: [],
         isDiscount: false,
       },
     });
 
-  /** The evnet when click confirm button on SelectCategoryModal */
+  // const { data } = await axios.post(
+  //   `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_NAME}/image/upload`,
+  //   formData
+  // );
+
+  /** The event when file is dropped selected from file select dialog  */
+  const onFileAccepted: <T extends File>(files: T[]) => void = (files) => {
+    setSelectedFiles((prev) => [...prev, ...files.map((file) => ({ file }))]);
+  };
+
+  /** The event when click confirm button on SelectCategoryModal */
   const onSelect = ({
     id,
     name,
@@ -83,7 +108,7 @@ const ProductCreate: NextPage = () => {
     }
   };
 
-  /** The evnet when click confirm button on InputSizeModal */
+  /** The event when click confirm button on InputSizeModal */
   const onInputSize = ({ name, stock }: { name: string; stock: number }) => {
     if (watch("size").find((size) => size.name === name)) {
       /** When tried add same name show error message */
@@ -97,13 +122,123 @@ const ProductCreate: NextPage = () => {
     }
   };
 
+  /** The event when click confirm button on InputAdditonalInfoModal */
+  const onInputAdditionalInfo = ({
+    name,
+    content,
+  }: {
+    name: string;
+    content: string;
+  }) => {
+    if (
+      watch("additionalInfos").find(
+        (additionalInfo) => additionalInfo.name === name
+      )
+    ) {
+      /** When tried add same name show error message */
+      toast({
+        status: "error",
+        title: "This name is already added",
+      });
+    } else {
+      setValue("additionalInfos", [
+        ...watch("additionalInfos"),
+        { name, content },
+      ]);
+      inputAdditionalModalControl.onClose();
+    }
+  };
+
+  /** The event when click save */
+  const onSubmit = handleSubmit((data) => {
+    /** upload images to cloudinary */
+    loadingCtx?.setLoading(true);
+    const res = Promise.all(
+      selectedFiles.map(async (file) => {
+        const formData = new FormData();
+        formData.append("file", file.file);
+        formData.append(
+          "upload_preset",
+          process.env.NEXT_PUBLIC_CLOUDINARY_PRESET || ""
+        );
+        formData.append(
+          "cloud_name",
+          process.env.NEXT_PUBLIC_CLOUDINARY_NAME || ""
+        );
+        const { data } = await axios.post(
+          `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_NAME}/image/upload`,
+          formData
+        );
+
+        return { data, isThumbnail: file.isThumbnail };
+      })
+    );
+
+    res
+      .then((infos: { data: { url: string }; isThumbnail?: boolean }[]) => {
+        const images = infos.map((info) => ({
+          uri: info.data.url,
+          isThumbnail: info.isThumbnail ? true : false,
+        }));
+
+        mutate({
+          ...data,
+          stock: Number(data.stock),
+          price: Number(data.price),
+          discountRate: Number(data.discountRate),
+          images,
+        });
+      })
+      .catch(() => {
+        loadingCtx?.setLoading(false);
+        toast({
+          status: "error",
+          title: "Error is occured while upload images",
+        });
+      });
+  });
+
   return (
     <div>
       <HeadSection title="Create new product" />
       <div className="flex flex-col gap-2">
         <div>
           <Accordion allowMultiple>
-            <AccordionSection title="Images" content={null} />
+            <AccordionSection
+              title="Images"
+              content={
+                <div>
+                  <CustomDropzone onFileAccepted={onFileAccepted} />
+                  <div className="flex flex-wrap gap-2 justify-center items-center h-60 overflow-auto mt-10">
+                    {selectedFiles.map((file, i) => (
+                      <div key={i} className="relative w-40 h-40 border">
+                        <Checkbox
+                          className="absolute top-2 left-2 z-40"
+                          colorScheme="teal"
+                          isChecked={file.isThumbnail}
+                          onChange={() => {
+                            setSelectedFiles((prev) =>
+                              prev.map((f, j) => {
+                                if (i === j) {
+                                  return { ...f, isThumbnail: true };
+                                }
+                                return { ...f, isThumbnail: false };
+                              })
+                            );
+                          }}
+                        />
+                        <Image
+                          className="object-contain"
+                          src={URL.createObjectURL(file.file)}
+                          alt=""
+                          fill
+                        />
+                      </div>
+                    ))}
+                  </div>
+                </div>
+              }
+            />
             <AccordionSection
               title="Name"
               content={
@@ -128,31 +263,28 @@ const ProductCreate: NextPage = () => {
                       Add
                     </Button>
                   </div>
-                  <Divider />
                   <div className="flex flex-col gap-2">
-                    {watch("categories").length > 0 ? (
-                      watch("categories").map((category) => (
-                        <div key={category.id} className="flex justify-between">
-                          <Text>{category.name}</Text>
-                          <Button
-                            colorScheme="red"
-                            size="xs"
-                            onClick={() =>
-                              setValue(
-                                "categories",
-                                watch("categories").filter(
-                                  (c) => c.id !== category.id
-                                )
+                    <CustomTable
+                      data={watch("categories")}
+                      columns={["name"]}
+                      tableCaption="Please add category"
+                      controlColumn={(category) => (
+                        <Button
+                          colorScheme="red"
+                          size="xs"
+                          onClick={() =>
+                            setValue(
+                              "categories",
+                              watch("categories").filter(
+                                (c) => c.id !== category.id
                               )
-                            }
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      ))
-                    ) : (
-                      <Text>Please add category</Text>
-                    )}
+                            )
+                          }
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    />
                   </div>
                 </AccordionBody>
               }
@@ -184,29 +316,25 @@ const ProductCreate: NextPage = () => {
                   </div>
                   <Divider />
                   <div className="flex flex-col gap-2">
-                    {watch("size").length > 0 ? (
-                      watch("size").map((size) => (
-                        <div key={size.name} className="flex justify-between">
-                          <Text>{size.name}</Text>
-                          <Button
-                            colorScheme="red"
-                            size="xs"
-                            onClick={() =>
-                              setValue(
-                                "size",
-                                watch("size").filter(
-                                  (s) => s.name !== size.name
-                                )
-                              )
-                            }
-                          >
-                            Delete
-                          </Button>
-                        </div>
-                      ))
-                    ) : (
-                      <Text>Please add size</Text>
-                    )}
+                    <CustomTable
+                      data={watch("size")}
+                      columns={["name", "stock"]}
+                      tableCaption="Please add size"
+                      controlColumn={(size) => (
+                        <Button
+                          colorScheme="red"
+                          size="xs"
+                          onClick={() =>
+                            setValue(
+                              "size",
+                              watch("size").filter((s) => s.name !== size.name)
+                            )
+                          }
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    />
                   </div>
                 </AccordionBody>
               }
@@ -247,22 +375,51 @@ const ProductCreate: NextPage = () => {
                 </div>
               }
             />
-            <AccordionSection title="Additional" content={null} />
+            <AccordionSection
+              title="Additional"
+              content={
+                <AccordionBody>
+                  <div className="flex justify-end">
+                    <Button
+                      colorScheme="teal"
+                      size="sm"
+                      onClick={inputAdditionalModalControl.onOpen}
+                    >
+                      Add
+                    </Button>
+                  </div>
+                  <Divider />
+                  <div className="flex flex-col gap-2">
+                    <CustomTable
+                      data={watch("additionalInfos")}
+                      columns={["name", "content"]}
+                      tableCaption="Please add additional information"
+                      controlColumn={(info) => (
+                        <Button
+                          colorScheme="red"
+                          size="xs"
+                          onClick={() =>
+                            setValue(
+                              "additionalInfos",
+                              watch("additionalInfos").filter(
+                                (additionalInfo) =>
+                                  additionalInfo.name !== info.name
+                              )
+                            )
+                          }
+                        >
+                          Delete
+                        </Button>
+                      )}
+                    />
+                  </div>
+                </AccordionBody>
+              }
+            />
           </Accordion>
         </div>
         <div className="flex justify-end">
-          <Button
-            colorScheme="teal"
-            size="sm"
-            onClick={handleSubmit((data) => {
-              mutate({
-                ...data,
-                stock: Number(data.stock),
-                price: Number(data.price),
-                discountRate: Number(data.discountRate),
-              });
-            })}
-          >
+          <Button colorScheme="teal" size="sm" onClick={onSubmit}>
             Create
           </Button>
         </div>
@@ -279,6 +436,13 @@ const ProductCreate: NextPage = () => {
           isOpen={inputSizeModalControl.isOpen}
           onClose={inputSizeModalControl.onClose}
           onClickConfirm={onInputSize}
+        />
+      ) : null}
+      {inputAdditionalModalControl.isOpen ? (
+        <InputAdditionalInfoModal
+          isOpen={inputAdditionalModalControl.isOpen}
+          onClose={inputAdditionalModalControl.onClose}
+          onClickConfirm={onInputAdditionalInfo}
         />
       ) : null}
     </div>

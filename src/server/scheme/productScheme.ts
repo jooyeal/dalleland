@@ -24,6 +24,12 @@ export const inputCreateProduct = z.object({
   price: z.number(),
   isDiscount: z.boolean(),
   discountRate: z.number().optional(),
+  additionalInfos: z
+    .object({
+      name: z.string(),
+      content: z.string(),
+    })
+    .array(),
 });
 
 export type TInputCreateProduct = z.infer<typeof inputCreateProduct>;

@@ -7,7 +7,35 @@ export const productRouter = router({
     .input(inputCreateProduct)
     .mutation(async ({ input, ctx }) => {
       try {
-        const { images, categories, size, ...rest } = input;
+        const { images, categories, additionalInfos, size, ...rest } = input;
+
+        if (!rest.name) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Product name is required",
+          });
+        }
+
+        if (!categories || categories.length === 0) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Product category is required",
+          });
+        }
+
+        if (!rest.stock) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Product stock is required",
+          });
+        }
+
+        if (!rest.price) {
+          throw new TRPCError({
+            code: "BAD_REQUEST",
+            message: "Product price is required",
+          });
+        }
 
         /** create new product */
         const newProduct = await ctx.prisma.product.create({
@@ -26,36 +54,15 @@ export const productRouter = router({
                 data: images,
               },
             },
+            additionalInfos: {
+              createMany: {
+                data: additionalInfos,
+              },
+            },
           },
         });
 
         return newProduct;
-
-        // /** create new images and link to product */
-        // await Promise.all(
-        //   images.map(
-        //     async (image) =>
-        //       await ctx.prisma.productImage.create({
-        //         data: {
-        //           ...image,
-        //           productId: newProduct.id,
-        //         },
-        //       })
-        //   )
-        // );
-
-        // /** create new sizes and link to product */
-        // await Promise.all(
-        //   size.map(
-        //     async (s) =>
-        //       await ctx.prisma.size.create({
-        //         data: {
-        //           ...s,
-        //           productId: newProduct.id,
-        //         },
-        //       })
-        //   )
-        // );
       } catch (e) {
         /** if error is occured by TRPC */
         if (e instanceof TRPCError) {

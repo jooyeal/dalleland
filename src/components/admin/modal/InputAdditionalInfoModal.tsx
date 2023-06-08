@@ -13,32 +13,38 @@ import {
 import React from "react";
 import { useForm } from "react-hook-form";
 
-const InputSizeModal: React.FC<
+const InputAdditionalInfoModal: React.FC<
   TModalProps & {
-    onClickConfirm: ({ name, stock }: { name: string; stock: number }) => void;
+    onClickConfirm: ({
+      name,
+      content,
+    }: {
+      name: string;
+      content: string;
+    }) => void;
   }
 > = ({ isOpen, onClose, onClickConfirm }) => {
   const { register, handleSubmit } = useForm<{
     name: string;
-    stock: number;
+    content: string;
   }>();
+
   return (
     <Modal isOpen={isOpen} onClose={onClose}>
       <ModalOverlay />
       <ModalContent>
         <ModalHeader>
-          <Text>Input size information</Text>
+          <Text>Input additional information</Text>
         </ModalHeader>
         <ModalBody>
           <div className="flex flex-col gap-2">
             <Input
               {...register("name", { required: true })}
-              placeholder="Please input size name"
+              placeholder="Please input additional info name"
             />
             <Input
-              {...register("stock", { required: true })}
-              type="number"
-              placeholder="Please input this size's stock"
+              {...register("content", { required: true })}
+              placeholder="Please input additional info content"
             />
           </div>
         </ModalBody>
@@ -60,4 +66,4 @@ const InputSizeModal: React.FC<
   );
 };
 
-export default InputSizeModal;
+export default InputAdditionalInfoModal;
