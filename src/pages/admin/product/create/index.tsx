@@ -69,11 +69,6 @@ const ProductCreate: NextPage = () => {
       },
     });
 
-  // const { data } = await axios.post(
-  //   `https://api.cloudinary.com/v1_1/${process.env.NEXT_PUBLIC_CLOUDINARY_NAME}/image/upload`,
-  //   formData
-  // );
-
   /** The event when file is dropped selected from file select dialog  */
   const onFileAccepted: <T extends File>(files: T[]) => void = (files) => {
     setSelectedFiles((prev) => [...prev, ...files.map((file) => ({ file }))]);
@@ -151,8 +146,9 @@ const ProductCreate: NextPage = () => {
 
   /** The event when click save */
   const onSubmit = handleSubmit((data) => {
-    /** upload images to cloudinary */
     loadingCtx?.setLoading(true);
+
+    /** upload images to cloudinary */
     const res = Promise.all(
       selectedFiles.map(async (file) => {
         const formData = new FormData();
@@ -174,6 +170,7 @@ const ProductCreate: NextPage = () => {
       })
     );
 
+    /** create product */
     res
       .then((infos: { data: { url: string }; isThumbnail?: boolean }[]) => {
         const images = infos.map((info) => ({

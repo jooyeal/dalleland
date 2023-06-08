@@ -1,10 +1,4 @@
-import {
-  Modal,
-  ModalBody,
-  ModalContent,
-  ModalOverlay,
-  Spinner,
-} from "@chakra-ui/react";
+import { Modal, ModalContent, ModalOverlay, Spinner } from "@chakra-ui/react";
 import React, { createContext, useState } from "react";
 
 type TLoadingContext = {

@@ -32,4 +32,13 @@ export const inputCreateProduct = z.object({
     .array(),
 });
 
+export const inputGetProductsByPage = z.object({
+  page: z.number().optional(),
+  searchTarget: z.string().optional(),
+});
+
+export const inputDeleteProduct = z.object({
+  id: z.string(),
+});
+
 export type TInputCreateProduct = z.infer<typeof inputCreateProduct>;

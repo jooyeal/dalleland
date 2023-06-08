@@ -1,4 +1,8 @@
-import { inputCreateProduct } from "../scheme/productScheme";
+import {
+  inputCreateProduct,
+  inputDeleteProduct,
+  inputGetProductsByPage,
+} from "../scheme/productScheme";
 import { authenticatedProcedure, publicProcedure, router } from "../trpc";
 import { TRPCError } from "@trpc/server";
 
@@ -63,6 +67,70 @@ export const productRouter = router({
         });
 
         return newProduct;
+      } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error",
+        });
+      }
+    }),
+  getProductsByPage: publicProcedure
+    .input(inputGetProductsByPage)
+    .query(async ({ input, ctx }) => {
+      try {
+        const PER_PAGE = 10;
+        const { page, searchTarget } = input;
+
+        const products = await ctx.prisma.product.findMany({
+          skip: !page ? 0 : PER_PAGE * page - 1,
+          take: PER_PAGE,
+          where: {
+            name: {
+              contains: searchTarget,
+            },
+          },
+          include: {
+            images: {
+              where: {
+                isThumbnail: true,
+              },
+            },
+            categories: true,
+          },
+        });
+
+        return products;
+      } catch (e) {
+        /** if error is occured by TRPC */
+        if (e instanceof TRPCError) {
+          throw new TRPCError({
+            code: e.code,
+            message: e.message,
+          });
+        }
+        throw new TRPCError({
+          code: "INTERNAL_SERVER_ERROR",
+          message: "Server error",
+        });
+      }
+    }),
+  deleteProduct: authenticatedProcedure
+    .input(inputDeleteProduct)
+    .mutation(async ({ input, ctx }) => {
+      try {
+        const { id } = input;
+        const product = await ctx.prisma.product.delete({
+          where: {
+            id,
+          },
+        });
       } catch (e) {
         /** if error is occured by TRPC */
         if (e instanceof TRPCError) {
