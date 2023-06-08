@@ -44,7 +44,7 @@ const CustomDropzone: React.FC<Props> = ({ onFileAccepted }) => {
       <input {...getInputProps()} />
 
       <Text className="text-xl font-semibold">
-        Drag 'n' drop some files here, or click to select files
+        Drag and drop some files here, or click to select files
       </Text>
       <Text className="text-xs">
         The file must be a image file and less than 5MB sizes
