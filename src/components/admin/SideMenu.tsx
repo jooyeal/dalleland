@@ -74,60 +74,62 @@ const SideMenu = ({ opened, onToggle }: TSideMenuProps) => {
         opened ? "w-sidemenu-opened" : "w-sidemenu-closed"
       } transition-all`}
     >
-      <div className={`flex ${opened ? "justify-end" : "justify-center"}`}>
-        <IconButton
-          aria-label=""
-          size="sm"
-          variant="ghost"
-          colorScheme="teal"
-          onClick={onToggle}
-        >
-          {opened ? <AiOutlineClose /> : <AiOutlineMenu />}
-        </IconButton>
-      </div>
-      <div className="mt-2 flex flex-col gap-2">
-        <SideMenuItem
-          title="Dashboard"
-          href="/admin"
-          opened={opened}
-          icon={<BsBarChart />}
-        />
-        <SideMenuItem
-          title="Orders"
-          href="/admin/order"
-          opened={opened}
-          icon={<BsClipboardCheck />}
-        />
-        <SideMenuItem
-          title="Products"
-          href="/admin/product"
-          opened={opened}
-          icon={<BsBoxSeam />}
-        />
-        <SideMenuItem
-          title="Categories"
-          href="/admin/category"
-          opened={opened}
-          icon={<BiCategory />}
-        />
-        <SideMenuItem
-          title="Users"
-          href="/admin/user"
-          opened={opened}
-          icon={<BiUser />}
-        />
-        <SideMenuItem
-          title="Notices"
-          href="/admin/notice"
-          opened={opened}
-          icon={<BsBell />}
-        />
-        <SideMenuItem
-          title="General"
-          href="/admin/general"
-          opened={opened}
-          icon={<BiDotsHorizontalRounded />}
-        />
+      <div className="sticky top-16">
+        <div className={`flex ${opened ? "justify-end" : "justify-center"}`}>
+          <IconButton
+            aria-label=""
+            size="sm"
+            variant="ghost"
+            colorScheme="teal"
+            onClick={onToggle}
+          >
+            {opened ? <AiOutlineClose /> : <AiOutlineMenu />}
+          </IconButton>
+        </div>
+        <div className="mt-2 flex flex-col gap-2">
+          <SideMenuItem
+            title="Dashboard"
+            href="/admin"
+            opened={opened}
+            icon={<BsBarChart />}
+          />
+          <SideMenuItem
+            title="Orders"
+            href="/admin/order"
+            opened={opened}
+            icon={<BsClipboardCheck />}
+          />
+          <SideMenuItem
+            title="Products"
+            href="/admin/product"
+            opened={opened}
+            icon={<BsBoxSeam />}
+          />
+          <SideMenuItem
+            title="Categories"
+            href="/admin/category"
+            opened={opened}
+            icon={<BiCategory />}
+          />
+          <SideMenuItem
+            title="Users"
+            href="/admin/user"
+            opened={opened}
+            icon={<BiUser />}
+          />
+          <SideMenuItem
+            title="Notices"
+            href="/admin/notice"
+            opened={opened}
+            icon={<BsBell />}
+          />
+          <SideMenuItem
+            title="General"
+            href="/admin/general"
+            opened={opened}
+            icon={<BiDotsHorizontalRounded />}
+          />
+        </div>
       </div>
     </div>
   );
