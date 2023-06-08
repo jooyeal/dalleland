@@ -15,10 +15,10 @@ const Layout = ({ children }: Props) => {
       <div className="flex">
         <SideMenu opened={opened} onToggle={() => setOpened((prev) => !prev)} />
         <div
-          className={`p-4 w-screen ${
+          className={`p-10 w-screen ${
             opened
-              ? "sm:pl-admin-layout-sidemenu-opened"
-              : "sm:pl-admin-layout-sidemenu-closed"
+              ? "sm:w-admin-layout-sidemenu-opened"
+              : "sm:w-admin-layout-sidemenu-closed"
           } transition-all`}
         >
           {children}
