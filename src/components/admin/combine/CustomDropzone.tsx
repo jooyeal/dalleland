@@ -25,7 +25,7 @@ const CustomDropzone: React.FC<Props> = ({ onFileAccepted }) => {
         onFileAccepted(acceptedFiles);
       }
     },
-    [onFileAccepted]
+    [onFileAccepted, toast]
   );
 
   const { getRootProps, getInputProps, isDragActive } = useDropzone({

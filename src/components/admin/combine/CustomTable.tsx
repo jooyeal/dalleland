@@ -40,8 +40,8 @@ const CustomTable = <T extends object>({
           <Tbody>
             {data.map((d, i) => (
               <Tr key={i}>
-                {columns.map((col) => (
-                  <Td>
+                {columns.map((col, j) => (
+                  <Td key={j}>
                     <Text>{d[col] as string}</Text>
                   </Td>
                 ))}
