@@ -12,12 +12,14 @@ import { BiCart, BiHeart, BiMenu, BiSearch, BiUser } from "react-icons/bi";
 import SearchModal from "./SearchModal";
 import { signOut, useSession } from "next-auth/react";
 import { trpc } from "@/utils/trpc";
+import BurgerMenu from "./BurgerMenu";
 
 /**
  * Header component
  */
 const Header: React.FC = () => {
-  const { isOpen, onOpen, onClose } = useDisclosure();
+  const searchModalControl = useDisclosure();
+  const burgerMenuControl = useDisclosure();
   const { status, data } = useSession();
   const { data: userData } = trpc.user.getUserByEmail.useQuery({
     email: data?.user?.email || "",
@@ -26,7 +28,10 @@ const Header: React.FC = () => {
   return (
     <div className="sticky top-0 h-16 flex justify-between items-center pl-6 pr-6 shadow-sm bg-white z-50">
       {/* Menu Icon */}
-      <BiMenu className="text-2xl sm:hidden" />
+      <BiMenu
+        className="text-2xl sm:hidden"
+        onClick={burgerMenuControl.onOpen}
+      />
       {/* Logo */}
       <span
         className="before:block before:absolute before:-inset-1 before:-skew-y-3 before:bg-teal-500 relative inline-block"
@@ -39,7 +44,7 @@ const Header: React.FC = () => {
       {/* Search Bar */}
       <div
         className="hidden sm:flex shadow-md h-12 w-2/5 rounded-md p-4 cursor-pointer items-center gap-4"
-        onClick={onOpen}
+        onClick={searchModalControl.onOpen}
       >
         <BiSearch className="text-xl text-zinc-400" />
         <Text className="text-zinc-400">Search products</Text>
@@ -86,7 +91,15 @@ const Header: React.FC = () => {
           </Menu>
         </div>
       </div>
-      <SearchModal isOpen={isOpen} onClose={onClose} />
+      <SearchModal
+        isOpen={searchModalControl.isOpen}
+        onClose={searchModalControl.onClose}
+      />
+      <BurgerMenu
+        isAdmin={userData?.isAdmin}
+        isOpen={burgerMenuControl.isOpen}
+        onClose={burgerMenuControl.onClose}
+      />
     </div>
   );
 };

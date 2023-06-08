@@ -127,7 +127,7 @@ const Category: NextPage = () => {
         }}
       />
       <div className="block sm:flex">
-        <div className="w-96 p-4">
+        <div className="sm:w-96 p-4">
           <Skeleton isLoaded={!allCategoriesDataIsLoading}>
             <TreeView
               nodes={allCategoriesData}
