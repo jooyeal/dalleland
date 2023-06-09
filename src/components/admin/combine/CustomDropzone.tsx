@@ -42,7 +42,7 @@ const CustomDropzone: React.FC<Props> = ({ onFileAccepted }) => {
       } `}
     >
       <input {...getInputProps()} />
-
+      {/* テスト */}
       <Text className="text-xl font-semibold">
         Drag and drop some files here, or click to select files
       </Text>
