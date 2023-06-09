@@ -152,7 +152,7 @@ model ProductImage {
   uri String
   isThumbnail Boolean @default(false)
   productId String
-  product Product @relation(fields: [productId], references: [id])
+  product Product @relation(fields: [productId], references: [id], onDelete: Cascade)
   createdAt DateTime @default(now())
   updatedAt DateTime @updatedAt
 }

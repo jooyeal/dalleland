@@ -145,7 +145,10 @@ const Product: NextPage = () => {
                   <Button
                     size="sm"
                     colorScheme="red"
-                    onClick={() => mutate({ id: product.id })}
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      mutate({ id: product.id });
+                    }}
                   >
                     Delete
                   </Button>
