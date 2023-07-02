@@ -24,38 +24,20 @@ import { useForm } from "react-hook-form";
 
 const User:NextPage = () =>  {
   const router = useRouter();
-  const toast = useToast();
 
-  /** TRPC get products */
+  /** TRPC get users */
   const { data, refetch } = trpc.user.getUsersByPage.useQuery({
     page: router.query.page ? Number(router.query.page) : 0,
     searchTarget: router.query.searchTarget
       ? String(router.query.searchTarget)
       : undefined,
   });
-
-  const { mutate } = trpc.product.deleteProduct.useMutation({
-    onSuccess: () => {
-      toast({
-        status: "success",
-        title: "Product is deleted successfully",
-      });
-      refetch();
-    },
-    onError: (error) => {
-      toast({
-        status: "error",
-        title: error.message,
-      });
-    },
-  });
-
   const { register, handleSubmit } = useForm<{ searchTarget: string }>();
 
   /** The evnet when excute search */
   const onSubmit = handleSubmit((data) => {
     router.push({
-      pathname: "/admin/product",
+      pathname: "/admin/user",
       query: {
         searchTarget: data.searchTarget,
       },
@@ -66,8 +48,6 @@ const User:NextPage = () =>  {
     <div>
       <HeadSection
         title="User"
-        buttonTitle="Create"
-        onClick={() => router.push("/admin/product/create")}
       />
       <div>
         <form onSubmit={onSubmit}>
@@ -87,7 +67,7 @@ const User:NextPage = () =>  {
         <Table>
           <TableCaption>
             {!data || data?.length === 0
-              ? "Please add product"
+              ? "Please add user"
               : null}
           </TableCaption>
           <Thead>
@@ -103,7 +83,7 @@ const User:NextPage = () =>  {
               <Tr
                 className="cursor-pointer"
                 key={user.id}
-                onClick={() => router.push(`/admin/product/${user.id}`)}
+                onClick={() => router.push(`/admin/user/${user.id}`)}
               >
                 <Td>
                 <Text>{user.id}</Text>
