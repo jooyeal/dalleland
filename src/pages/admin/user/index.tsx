@@ -22,7 +22,7 @@ import { useRouter } from "next/router";
 import React, { useMemo } from "react";
 import { useForm } from "react-hook-form";
 
-const User:NextPage = () =>  {
+const User: NextPage = () => {
   const router = useRouter();
 
   /** TRPC get users */
@@ -86,7 +86,7 @@ const User:NextPage = () =>  {
                 onClick={() => router.push(`/admin/user/${user.id}`)}
               >
                 <Td>
-                <Text>{user.id}</Text>
+                  <Text>{user.id}</Text>
                 </Td>
                 <Td>
                   <Text>{user.name}</Text>
@@ -95,7 +95,7 @@ const User:NextPage = () =>  {
                   <Text>{user.email}</Text>
                 </Td>
                 <Td>
-                <Badge ml='1' fontSize='0.8em' colorScheme={badgeColor[user.grade?.name || ""]}>{user.grade?.name}</Badge>
+                  <Badge ml='1' fontSize='0.8em' colorScheme={badgeColor[user.grade?.name || ""]}>{user.grade?.name}</Badge>
                 </Td>
               </Tr>
             ))}
